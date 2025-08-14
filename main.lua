@@ -3549,23 +3549,60 @@
             return setmetatable(cfg, library)
         end 
 
-        function library:init_config(window) 
-            window:seperator({name = "Settings"})
-            local main = window:tab({name = "Configs", tabs = {"Main"}})
-            
-            local column = main:column({})
-            local section = column:section({name = "Configs", size = 1, default = true, icon = "rbxassetid://139628202576511"})
-            config_holder = section:list({options = {"Report", "This", "Error", "To", "Finobe"}, callback = function(option) end, flag = "config_name_list"}); library:update_config_list()
-            
-            local column = main:column({})
-            local section = column:section({name = "Settings", side = "right", size = 1, default = true, icon = "rbxassetid://129380150574313"})
-            section:textbox({name = "Config name:", flag = "config_name_text"})
-            section:button({name = "Save", callback = function() writefile(library.directory .. "/configs/" .. flags["config_name_text"] or flags["config_name_list"] .. ".cfg", library:get_config()) library:update_config_list() notifications:create_notification({name = "Configs", info = "Saved config to:\n" .. flags["config_name_list"] or flags["config_name_text"]}) end}) 
-            section:button({name = "Load", callback = function() library:load_config(readfile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg"))  library:update_config_list() notifications:create_notification({name = "Configs", info = "Loaded config:\n" .. flags["config_name_list"]}) end})
-            section:button({name = "Delete", callback = function() delfile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg")  library:update_config_list() notifications:create_notification({name = "Configs", info = "Deleted config:\n" .. flags["config_name_list"]}) end})
-            section:colorpicker({name = "Menu Accent", callback = function(color, alpha) library:update_theme("accent", color) end, color = themes.preset.accent})
-            section:keybind({name = "Menu Bind", callback = function(bool) window.toggle_menu(bool) end, default = true})
+       function library:init_config(window) 
+    window:seperator({name = "Settings"})
+    local main = window:tab({name = "Configs", tabs = {"Main"}})
+    
+    local column = main:column({})
+    local section = column:section({name = "Configs", size = 1, default = true, icon = "rbxassetid://139628202576511"})
+    config_holder = section:list({options = {"Report", "This", "Error", "To", "Finobe"}, callback = function(option) end, flag = "config_name_list"}); library:update_config_list()
+    
+    local column = main:column({})
+    local section = column:section({name = "Settings", side = "right", size = 1, default = true, icon = "rbxassetid://129380150574313"})
+    section:textbox({name = "Config name:", flag = "config_name_text"})
+    
+    section:button({
+        name = "Save", 
+        callback = function() 
+            local filename = flags["config_name_text"] or flags["config_name_list"]
+            local filepath = library.directory .. "/configs/" .. filename .. ".cfg"
+            writefile(filepath, library:get_config()) 
+            library:update_config_list() 
+            notifications:create_notification({name = "Configs", info = "Saved config to:\n" .. filename})
         end
+    }) 
+    
+    section:button({
+        name = "Load", 
+        callback = function() 
+            local filepath = library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg"
+            if isfile(filepath) then
+                library:load_config(readfile(filepath))  
+                library:update_config_list() 
+                notifications:create_notification({name = "Configs", info = "Loaded config:\n" .. flags["config_name_list"]})
+            else
+                notifications:create_notification({name = "Configs", info = "Config not found!"})
+            end
+        end
+    })
+    
+    section:button({
+        name = "Delete", 
+        callback = function() 
+            local filepath = library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg"
+            if isfile(filepath) then
+                delfile(filepath)  
+                library:update_config_list() 
+                notifications:create_notification({name = "Configs", info = "Deleted config:\n" .. flags["config_name_list"]})
+            else
+                notifications:create_notification({name = "Configs", info = "Config not found!"})
+            end
+        end
+    })
+    
+    section:colorpicker({name = "Menu Accent", callback = function(color, alpha) library:update_theme("accent", color) end, color = themes.preset.accent})
+    section:keybind({name = "Menu Bind", callback = function(bool) window.toggle_menu(bool) end, default = true})
+end
     --
 
     -- Notification Library
